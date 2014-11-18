@@ -11,22 +11,14 @@ function generateClients(nbClient) {
 };
 
 function generateClient(i) {
-    var socket = io();
+    var socket = io('http://localhost:3001', { forceNew: true });
 
     socket.on('message', function (message) {
         console.log("Client received message : " + message);
-        //socket.disconnect();
+        // socket.emit('disconnect', {});
+        socket.disconnect();
     });
 
-};
-
-function closePreviousSocket() {
-    var i;
-    for(i = 0; i < sockets.length; i++) {
-        sockets[i].disconnect();
-    }
-    delete sockets;
-    sockets = [];
 };
 
 function start() {
@@ -35,7 +27,7 @@ function start() {
     generateClients(nbClient);
 
     // Start test
-    var socket = io();
+    var socket = io('http://localhost:3001', { forceNew: true });
     socket.emit('start', nbMessage);
     socket.close();
 }
