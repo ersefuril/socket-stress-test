@@ -1,0 +1,10 @@
+{
+  "ACT": {
+    "ARTICLES": [
+      {"content": "Article 1"},
+      {"content": "Article 2"},
+      {"content": "Article 3"},
+      {"content": "Article 4"}
+    ]
+  }
+}
