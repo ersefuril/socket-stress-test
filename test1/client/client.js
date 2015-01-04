@@ -11,30 +11,34 @@ function generateClients(nbClient) {
 };
 
 function generateClient(i) {
-    var socket = io('http://localhost:3001', { forceNew: true });
 
-    socket.on('message', function (message) {
-        console.log("Client received message : " + message);
+    var socket = io('http://localhost:3001', { "force new connection" : true });
+
+    socket.on('message', function (data) {
+        console.log("Client received message : " + data.msg);
         // socket.emit('disconnect', {});
-        socket.disconnect();
+        if (data.isEnd) {
+            socket.disconnect();
+        }
     });
-
 };
+
+
+var mainSocket = io('http://localhost:3001', { "force new connection": true });
 
 function start() {
     var nbMessage = $('#nbMessage').val();
     var nbClient = $('#nbClient').val();
     generateClients(nbClient);
 
-    // Start test
-    var socket = io('http://localhost:3001', { forceNew: true });
-    socket.emit('start', nbMessage);
-    socket.close();
+    // we wait for the generated clients to connect to the server
+    setTimeout(function() {
+        mainSocket.emit('start', nbMessage);
+    }, 1000);
 }
 
 function killConnections() {
-    var socket = io();
-    socket.emit('kill');
+    mainSocket.emit('kill');
 }
 
 
