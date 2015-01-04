@@ -5,7 +5,7 @@ var io = require('socket.io')(server);
 
 var port = process.env.PORT || 3001;
 
-app.use(express.static(__dirname + '/client'));
+app.use(express.static(__dirname + '/client_old'));
 
 server.listen(port, function () {
     console.log('Server listening at port %d', port);

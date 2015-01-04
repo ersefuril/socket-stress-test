@@ -1,107 +1,57 @@
-function generateClients(nbClient) {
-    if(nbClient < 1) { nbClient = 1; };
-    console.log("* Generate " + nbClient + " client...");
-    // Generate X socket clients
-    var i;
-    for(i = 0; i < nbClient; i++) {
-        generateClient(i);
-    };
-    console.log("* Finish");
+/**
+ * Created by RC on 27/12/2014.
+ */
+var fs = require('fs');
+var io = require('socket.io-client')('http://localhost:3001');
 
-};
+// Timer variables
+var heartbeatInterval = 2 * 1000;
+var idx = 0;
+var intervalID;
 
-function generateClient(i) {
-    var socket = io('http://localhost:3001', { forceNew: true });
+// Messages and stats variables
+var messages = [];
+var nbReceivedMessage = 0;
 
-    socket.on('message', function (message) {
-        console.log("Client received message : " + message);
-        // socket.emit('disconnect', {});
-        socket.disconnect();
+// Get program arguments
+var args = process.argv.splice(2);
+var nbClient = args[0];
+var nbMessageToReceive = args[1];
+
+console.log('* Creating ' + nbClient + ' client instances...');
+
+var makeConnection = function() {
+    console.log("new client");
+    io.connect('http://localhost:3001', { 'force new connection' : true });
+
+    io.on('message', function (message) {
+       handleMessage(io, message);
     });
 
+    idx++;
+    if (idx == nbClient) {
+        clearInterval(intervalID);
+        start(io);
+    }
 };
 
-function start() {
-    var nbMessage = $('#nbMessage').val();
-    var nbClient = $('#nbClient').val();
-    generateClients(nbClient);
+var start = function (io) {
+    console.log('* Sending start message to server...')
+    io.emit('start', nbMessageToReceive);
+    //io.disconnect();
+};
 
-    // Start test
-    var socket = io('http://localhost:3001', { forceNew: true });
-    socket.emit('start', nbMessage);
-    socket.close();
+var handleMessage = function(io, message) {
+    console.log("* Client has received a message : " + message);
+    nbReceivedMessage++;
+    messages.push({'qzdq': io.id, 'message': message});
+
+    if(nbReceivedMessage == nbMessageToReceive * nbClient) {
+        var statsFile = 'test1/stats/bench.txt';
+        console.log('* Writing stats data to ' + statsFile);
+        fs.writeFile(statsFile, JSON.stringify(messages));
+    }
+    io.disconnect();
 }
 
-function killConnections() {
-    var socket = io();
-    socket.emit('kill');
-}
-
-
-
-/*
-socket.on('disconnect', function () {
-    updateConnectionStatus('Disconnected');
-});
-
-function askQuestion() {
-    socket.emit('question');
-}
-
-function launchTest() {
-
-    var nbQuestionAnswered = 0, startTime = new Date().getTime(),
-        testTime = getTestTime(), nbIterations = getNbIterations();
-
-    var result = {
-        testTime: testTime,
-        iterations: []
-    };
-
-    askQuestion();
-
-    socket.on('answer', function() {
-        nbQuestionAnswered++;
-        if ((new Date().getTime() - startTime) < testTime) {
-            askQuestion();
-        } else {
-            result.iterations.push(nbQuestionAnswered);
-            showProgress(result.iterations.length, nbIterations);
-            if (result.iterations.length == nbIterations) { // end of process
-                socket.removeAllListeners('answer');
-                showResult(result);
-            } else { // new iteration
-                startTime = new Date().getTime();
-                nbQuestionAnswered = 0;
-                askQuestion();
-            }
-        }
-    });
-}
-*/
-
-/* UI */
-
-/*
-function updateConnectionStatus(status) {
-    $('#connectionStatus').text(status);
-}
-
-function showProgress(currentIteration, nbIterations) {
-    $('#result').text('Iteration ' + currentIteration + '/' + nbIterations);
-}
-
-function showResult(result) {
-    var sum = 0;
-    for(var i in result.iterations) { sum += result.iterations[i]; }
-    $('#result').text('Average of number of questions answered in ' + (result.testTime/1000) + ' seconds : ' + sum / result.iterations.length);
-}
-
-function getNbIterations() {
-    return parseInt($('#nbIterations').val());
-}
-
-function getTestTime() {
-    return parseInt($('#testTime').val()) * 1000;
-}
-*/
+intervalID = setInterval(makeConnection, heartbeatInterval/nbClient);
