@@ -6,22 +6,26 @@ var io = require('socket.io')(server);
 var port = process.env.PORT || 3001;
 app.use(express.static(__dirname + '/client'));
 
-// Timer variables
-var heartbeatInterval = 2 * 1000;
-var idx = 0;
+// Config
+var heartbeatInterval = 50;
+
+// Messages, Timer and stats variables
+var sentMessages = 0;
 var intervalID;
+var clients = [];
 
 server.listen(port, function () {
     console.log('Server listening at port %d', port);
 });
 
 io.on('connection', function(socket) {
-    console.log("Socket :" , socket.id);
+    clients.push(socket.id);
 
     socket.on('start', function(nbMessage) {
-        console.log('* Starting test : broadcast ' + nbMessage + ' messages');
+        console.log("* Number of connected clients : " + clients.length);
+        console.log('* Starting test : broadcast ' + nbMessage + ' messages (time interval : ' +  heartbeatInterval + ' ms)');
 
-        intervalID = setInterval(function() { sendMessage(nbMessage); }, heartbeatInterval/nbMessage);
+        intervalID = setInterval(function() { sendMessage(nbMessage); }, heartbeatInterval);
     });
 
     socket.on('disconnect', function() {  });
@@ -29,13 +33,13 @@ io.on('connection', function(socket) {
 });
 
 var sendMessage = function(nbMessage) {
-    console.log('* Sending message to clients...')
-    io.emit('message', "Hello from server !");
-    idx++;
+    io.emit('message', { id:'', content: 'Hello from server !'});
+    sentMessages++;
 
-    if (idx == nbMessage) {
+    if (sentMessages == nbMessage) {
         console.log('* Stopping test');
         clearInterval(intervalID);
-        idx = 0;
+        sentMessages = 0;
+        clients = [];
     }
 };
