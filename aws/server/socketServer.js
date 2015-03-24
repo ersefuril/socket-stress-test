@@ -16,7 +16,7 @@ var MESSAGE = {
     }
 };
 
-var nbConnection = 0, isFirstConnection = true, nbMessagesReceived = 0, nbClientsDone = 0, nbClients = 100, nbMessages = 5000, interval = 100, isEmitter = false;
+var nbConnection = 0, isFirstConnection = true, nbMessagesReceived = 0, nbClientsDone = 0, nbClients = 100, nbMessages = 1000, interval = 1000, isEmitter = false;
 
 io.on('connection', function(socket){
 
@@ -48,16 +48,14 @@ io.on('connection', function(socket){
 });
 
 function emit() {
-    if (isEmitter) {
-        var timerId = setInterval(function() {
-            if (nbMessagesReceived < nbMessages) {
-                MESSAGE.id = Math.floor(Math.random() * 1000000);
-                io.emit('message', MESSAGE);
-                nbMessagesReceived++;
-            } else {
-                console.log('End time : ' + new Date());
-                clearInterval(timerId);
-            }
-        }, interval);
-    }
+    var timerId = setInterval(function() {
+        if (nbMessagesReceived < nbMessages) {
+            MESSAGE.id = Math.floor(Math.random() * 1000000);
+            io.emit('message', MESSAGE);
+            nbMessagesReceived++;
+        } else {
+            console.log('End time : ' + new Date());
+            clearInterval(timerId);
+        }
+    }, interval);
 }
