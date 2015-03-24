@@ -1,6 +1,11 @@
-var io = require('socket.io')();
+var express = require('express');
+var app = express();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
 
-io.serveClient(false); // TODO : is usefull ?
+server.listen(80);
+
+app.use(express.static(__dirname + '/../client'));
 
 /* TODO : JSON conf */
 var MESSAGE = {
@@ -11,7 +16,7 @@ var MESSAGE = {
     }
 };
 
-var nbConnection = 0, isFirstConnection = true, nbMessagesReceived = 0, nbClientsDone = 0, nbClients = 100, nbMessages = 100000, interval = 0, isEmitter = false;
+var nbConnection = 0, isFirstConnection = true, nbMessagesReceived = 0, nbClientsDone = 0, nbClients = 100, nbMessages = 20000, interval = 100, isEmitter = false;
 
 io.on('connection', function(socket){
 
@@ -56,5 +61,3 @@ function emit() {
         }, interval);
     }
 }
-
-io.listen(4002);

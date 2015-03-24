@@ -9,7 +9,7 @@ var MESSAGE = {
     }
 };
 
-var nbMessages = 100000, nbClientsDone = 0, interval = 0, isEmitter = true, nbClients = 100;
+var nbMessages = 20000, nbClientsDone = 0, interval = 100, isEmitter = true, nbClients = 100;
 
 console.log('Start time : ' + new Date());
 
@@ -19,7 +19,7 @@ for (var j = 0; j < nbClients; j++) {
 
 function createClient() {
 
-    var i = 0, socket = io('http://localhost:4002', {forceNew: true});
+    var i = 0, socket = io('http://localhost:80', {forceNew: true});
 
     if (isEmitter) {
         var timerId = setInterval(function() {
