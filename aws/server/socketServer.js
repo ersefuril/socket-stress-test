@@ -16,7 +16,7 @@ var MESSAGE = {
     }
 };
 
-var nbConnection = 0, isFirstConnection = true, nbMessagesReceived = 0, nbClientsDone = 0, nbClients = 100, nbMessages = 20000, interval = 100, isEmitter = false;
+var nbConnection = 0, isFirstConnection = true, nbMessagesReceived = 0, nbClientsDone = 0, nbClients = 100, nbMessages = 5000, interval = 100, isEmitter = false;
 
 io.on('connection', function(socket){
 
